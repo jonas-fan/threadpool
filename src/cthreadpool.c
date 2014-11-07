@@ -58,6 +58,8 @@ CThreadPool * cthreadpool_create(unsigned int threads)
     pool->threads = (pthread_t *)malloc(sizeof(pthread_t) * pool->threads_size);
 
     if (!pool->threads) {
+        pthread_mutex_destroy(&(pool->mutex));
+
         queue_destroy(pool->task_queue);
 
         free(pool);
@@ -72,28 +74,6 @@ CThreadPool * cthreadpool_create(unsigned int threads)
     }
 
     return pool;
-}
-
-bool cthreadpool_add(CThreadPool *pool,
-                     void (*function)(void *),
-                     void *data)
-{
-    CTask *task = (CTask *)malloc(sizeof(CTask));
-
-    if (!task) {
-        return false;
-    }
-
-    task->function = function;
-    task->data = data;
-
-    pthread_mutex_lock(&(pool->mutex));
-
-    queue_push(pool->task_queue, (void *)task);
-
-    pthread_mutex_unlock(&(pool->mutex));
-
-    return true;
 }
 
 void cthreadpool_destroy(CThreadPool *pool)
@@ -121,6 +101,28 @@ void cthreadpool_destroy(CThreadPool *pool)
     queue_destroy(pool->task_queue);
 
     free(pool);
+}
+
+bool cthreadpool_add(CThreadPool *pool,
+                     void (*function)(void *),
+                     void *data)
+{
+    CTask *task = (CTask *)malloc(sizeof(CTask));
+
+    if (!task) {
+        return false;
+    }
+
+    task->function = function;
+    task->data = data;
+
+    pthread_mutex_lock(&(pool->mutex));
+
+    queue_push(pool->task_queue, (void *)task);
+
+    pthread_mutex_unlock(&(pool->mutex));
+
+    return true;
 }
 
 

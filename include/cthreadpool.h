@@ -15,7 +15,7 @@ extern "C" {
 /**
  *    Simple thread pool
  *
- *    @verison 0.1.0
+ *    @verison 0.1.1
  *    @date    2014/11/07
  *    @author  Jian <jianfan.tw@gmail.com>
  */
@@ -24,11 +24,11 @@ typedef struct c_thread_pool_t CThreadPool;
 
 CThreadPool * cthreadpool_create(unsigned int threads);
 
+void cthreadpool_destroy(CThreadPool *pool);
+
 bool cthreadpool_add(CThreadPool *pool,
                      void (*function)(void *),
                      void *data);
-
-void cthreadpool_destroy(CThreadPool *pool);
 
 #ifdef __cplusplus
 }
