@@ -1,4 +1,4 @@
-# c-simple-stl
+# c-thread-pool
 [![Build Status](https://travis-ci.org/yjfan/c-thread-pool.svg)](https://travis-ci.org/yjfan/c-thread-pool)
 
 Implement Simple thread pool in C
