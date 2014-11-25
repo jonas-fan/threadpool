@@ -5,7 +5,7 @@ Implement Simple thread pool in C
 
 ## Build
 ```
-$ git clone https://github.com/yjfan/c-thread-pool.git
+$ git clone --recursive https://github.com/yjfan/c-thread-pool.git
 $ cd c-thread-pool/build
 $ cmake ..
 $ make

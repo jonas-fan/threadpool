@@ -150,11 +150,11 @@ static void * handler(void *data)
             task->function)
         {
             task->function(task->data);
-
-            free(task);
-
-            task = NULL;
         }
+
+        free(task);
+
+        task = NULL;
     }
 
     pthread_exit(NULL);

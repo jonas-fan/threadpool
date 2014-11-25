@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-void test(void *data)
+void increment(void *data)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     unsigned int index;
 
     for (index = 0; index < 100; ++index) {
-        assert(cthreadpool_add(pool, test, &count));
+        assert(cthreadpool_add(pool, increment, &count));
     }
 
     sleep(5);
