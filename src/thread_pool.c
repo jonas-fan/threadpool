@@ -1,7 +1,8 @@
-#include <cthreadpool.h>
+#include <thread_pool.h>
 #include <queue.h>
 
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 
 
@@ -9,13 +10,13 @@
  *    Private
  */
 
-typedef struct c_task_t
+typedef struct task_t
 {
-    void (*function)(void *);
+    ThreadPoolFunction function;
     void *data;
-} CTask;
+} Task;
 
-struct c_thread_pool_t
+struct thread_pool_t
 {
     pthread_t *threads;
     unsigned int threads_size;
@@ -34,15 +35,19 @@ static void * handler(void *data);
  *    Public
  */
 
-CThreadPool * cthreadpool_create(unsigned int threads)
+ThreadPool * threadpool_create(unsigned int threads_size)
 {
-    CThreadPool *pool = (CThreadPool *)malloc(sizeof(CThreadPool));
+    if (!threads_size) {
+        return NULL;
+    }
+
+    ThreadPool *pool = (ThreadPool *)malloc(sizeof(ThreadPool));
 
     if (!pool) {
         return NULL;
     }
 
-    pool->release_flag = false;
+    memset(pool, 0, sizeof(ThreadPool));
 
     pool->task_queue = queue_create();
 
@@ -52,20 +57,19 @@ CThreadPool * cthreadpool_create(unsigned int threads)
         return NULL;
     }
 
-    pthread_mutex_init(&(pool->mutex), NULL);
-
-    pool->threads_size = threads;
+    pool->release_flag = false;
+    pool->threads_size = threads_size;
     pool->threads = (pthread_t *)malloc(sizeof(pthread_t) * pool->threads_size);
 
     if (!pool->threads) {
-        pthread_mutex_destroy(&(pool->mutex));
-
         queue_destroy(pool->task_queue);
 
         free(pool);
 
         return NULL;
     }
+
+    pthread_mutex_init(&(pool->mutex), NULL);
 
     unsigned int index;
 
@@ -76,7 +80,7 @@ CThreadPool * cthreadpool_create(unsigned int threads)
     return pool;
 }
 
-void cthreadpool_destroy(CThreadPool *pool)
+void threadpool_destroy(ThreadPool *pool)
 {
     pool->release_flag = true;
 
@@ -91,7 +95,7 @@ void cthreadpool_destroy(CThreadPool *pool)
     pthread_mutex_destroy(&(pool->mutex));
 
     while (queue_size(pool->task_queue)) {
-        CTask *task = (CTask *)queue_front(pool->task_queue);
+        Task *task = (Task *)queue_front(pool->task_queue);
 
         queue_pop(pool->task_queue);
 
@@ -103,11 +107,13 @@ void cthreadpool_destroy(CThreadPool *pool)
     free(pool);
 }
 
-bool cthreadpool_add(CThreadPool *pool,
-                     void (*function)(void *),
-                     void *data)
+bool threadpool_add(ThreadPool *pool, ThreadPoolFunction function, void *data)
 {
-    CTask *task = (CTask *)malloc(sizeof(CTask));
+    if (!function) {
+        return false;
+    }
+
+    Task *task = (Task *)malloc(sizeof(Task));
 
     if (!task) {
         return false;
@@ -132,29 +138,27 @@ bool cthreadpool_add(CThreadPool *pool,
 
 static void * handler(void *data)
 {
-    CThreadPool *pool = (CThreadPool *)data;
-    CTask *task = NULL;
+    ThreadPool *pool = (ThreadPool *)data;
+    Task *task = NULL;
 
     while (!pool->release_flag) {
         pthread_mutex_lock(&(pool->mutex));
 
         if (queue_size(pool->task_queue)) {
-            task = (CTask *)queue_front(pool->task_queue);
+            task = (Task *)queue_front(pool->task_queue);
 
             queue_pop(pool->task_queue);
         }
 
         pthread_mutex_unlock(&(pool->mutex));
 
-        if (task &&
-            task->function)
-        {
+        if (task) {
             task->function(task->data);
+
+            free(task);
+
+            task = NULL;
         }
-
-        free(task);
-
-        task = NULL;
     }
 
     pthread_exit(NULL);

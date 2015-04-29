@@ -1,12 +1,12 @@
-# c-thread-pool
-[![Build Status](https://travis-ci.org/yjfan/c-thread-pool.svg)](https://travis-ci.org/yjfan/c-thread-pool)
+# simple-thread-pool
+[![Build Status](https://travis-ci.org/yjfan/simple-thread-pool.svg?branch=master)](https://travis-ci.org/yjfan/simple-thread-pool)
 
-Implement Simple thread pool in C
+Implement simple thread pool in C
 
 ## Build
 ```
-$ git clone --recursive https://github.com/yjfan/c-thread-pool.git
-$ cd c-thread-pool/build
+$ git clone --recursive https://github.com/yjfan/simple-thread-pool.git
+$ cd simple-thread-pool/build
 $ cmake ..
 $ make
 $ ./test/test
@@ -14,20 +14,20 @@ $ ./test/test
 
 ## Example
 ```cpp
-void thread(void *data)
+void worker(void *data)
 {
     // do something ...
 }
 ```
 
 ```cpp
-CThreadPool *pool = cthreadpool_create(4);
+ThreadPool *pool = threadpool_create(4);
 
-cthreadpool_add(pool, thread, NULL);
+threadpool_add(pool, worker, NULL);
 
 // do something ...
 
-cthreadpool_destroy(pool);
+threadpool_destroy(pool);
 ```
 
 ## License

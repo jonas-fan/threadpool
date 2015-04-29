@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(c-thread-pool-test C)
+project(simple-thread-pool-test C)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -O2")
 
@@ -13,5 +13,5 @@ add_executable(test
 )
 
 target_link_libraries(test
-    cthreadpool
+    simplethreadpool
 )
