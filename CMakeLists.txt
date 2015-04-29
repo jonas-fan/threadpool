@@ -6,7 +6,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -O2")
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/c-simple-stl/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/simple-container/include/
 )
 
 add_library(cthreadpool STATIC
@@ -15,8 +15,8 @@ add_library(cthreadpool STATIC
 
 target_link_libraries(cthreadpool
     pthread
-    csstl
+    simplecontainer
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/c-simple-stl)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/simple-container)

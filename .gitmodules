@@ -1,3 +1,3 @@
-[submodule "third_party/c-simple-stl"]
-	path = third_party/c-simple-stl
-	url = https://github.com/yjfan/c-simple-stl.git
+[submodule "third_party/simple-container"]
+	path = third_party/simple-container
+	url = https://github.com/yjfan/simple-container.git
