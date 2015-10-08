@@ -26,7 +26,7 @@ int main(/*int argc, char *argv[]*/)
     unsigned int index;
 
     for (index = 0; index < 1; ++index) {
-        assert(threadpool_run(pool, increment, &count));
+        assert(threadpool_run(pool, increment, &count) == 0);
     }
 
     while (count != 1) {

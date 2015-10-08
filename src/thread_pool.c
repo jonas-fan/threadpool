@@ -21,7 +21,7 @@ struct threadpool_t
 
     queue_t *task_queue;
 
-    bool release_flag;
+    int running;
 };
 
 static inline void * handler(void *data)
@@ -30,14 +30,14 @@ static inline void * handler(void *data)
     task_t task;
     int retval = -1;
 
-    while (!pool->release_flag) {
+    while (pool->running) {
         pthread_mutex_lock(&(pool->mutex));
 
         if (queue_size(pool->task_queue)) {
             retval = queue_pop(pool->task_queue, &task, sizeof(task_t));
         }
         else {
-            if (pool->release_flag) {
+            if (!pool->running) {
                 pthread_mutex_unlock(&(pool->mutex));
                 break;
             }
@@ -83,7 +83,7 @@ threadpool_t * threadpool_create(unsigned int threads_size)
         return NULL;
     }
 
-    pool->release_flag = false;
+    pool->running = 1;
     pool->threads_size = threads_size;
     pool->threads = (pthread_t *)malloc(sizeof(pthread_t) * pool->threads_size);
 
@@ -107,7 +107,7 @@ threadpool_t * threadpool_create(unsigned int threads_size)
 
 void threadpool_destroy(threadpool_t *pool)
 {
-    pool->release_flag = true;
+    pool->running = 0;
 
     pthread_mutex_lock(&(pool->mutex));
 
@@ -133,10 +133,10 @@ void threadpool_destroy(threadpool_t *pool)
     free(pool);
 }
 
-bool threadpool_run(threadpool_t *pool, threadpool_func function, void *data)
+int threadpool_run(threadpool_t *pool, threadpool_func function, void *data)
 {
     if (!function) {
-        return false;
+        return -1;
     }
 
     task_t task = {
@@ -152,5 +152,5 @@ bool threadpool_run(threadpool_t *pool, threadpool_func function, void *data)
 
     pthread_mutex_unlock(&(pool->mutex));
 
-    return true;
+    return 0;
 }

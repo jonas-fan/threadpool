@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-#include <stdbool.h>
-
 /**
  *    Reference:
  *        https://github.com/mbrossard/threadpool
@@ -27,7 +25,7 @@ threadpool_t * threadpool_create(unsigned int threads_size);
 
 void threadpool_destroy(threadpool_t *pool);
 
-bool threadpool_run(threadpool_t *pool, threadpool_func function, void *data);
+int threadpool_run(threadpool_t *pool, threadpool_func function, void *data);
 
 #ifdef __cplusplus
 }
