@@ -18,20 +18,20 @@ static void increment(void *data)
     pthread_mutex_unlock(&mutex);
 }
 
-int main(int argc, char *argv[])
+int main(/*int argc, char *argv[]*/)
 {
-    ThreadPool *pool = threadpool_create(4);
+    threadpool_t *pool = threadpool_create(4);
 
     unsigned int count = 0;
     unsigned int index;
 
-    for (index = 0; index < 100; ++index) {
-        assert(threadpool_add(pool, increment, &count));
+    for (index = 0; index < 1; ++index) {
+        assert(threadpool_run(pool, increment, &count));
     }
 
-    sleep(5);
-
-    assert(count == 100);
+    while (count != 1) {
+        usleep(200 * 1000);
+    }
 
     threadpool_destroy(pool);
 

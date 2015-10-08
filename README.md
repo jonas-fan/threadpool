@@ -21,9 +21,9 @@ void worker(void *data)
 ```
 
 ```cpp
-ThreadPool *pool = threadpool_create(4);
+threadpool_t *pool = threadpool_create(4);
 
-threadpool_add(pool, worker, NULL);
+threadpool_run(pool, worker, NULL);
 
 // do something ...
 

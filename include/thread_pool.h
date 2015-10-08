@@ -15,20 +15,19 @@ extern "C" {
 /**
  *    Simple thread pool
  *
- *    @verison 0.2.0
- *    @date    2015/04/29
+ *    @date    2015/10/08
  *    @author  Jian <jianfan.tw@gmail.com>
  */
 
-typedef struct thread_pool_t ThreadPool;
+typedef struct threadpool_t threadpool_t;
 
-typedef void (*ThreadPoolFunction)(void *);
+typedef void (*threadpool_func)(void *);
 
-ThreadPool * threadpool_create(unsigned int threads_size);
+threadpool_t * threadpool_create(unsigned int threads_size);
 
-void threadpool_destroy(ThreadPool *pool);
+void threadpool_destroy(threadpool_t *pool);
 
-bool threadpool_add(ThreadPool *pool, ThreadPoolFunction function, void *data);
+bool threadpool_run(threadpool_t *pool, threadpool_func function, void *data);
 
 #ifdef __cplusplus
 }
