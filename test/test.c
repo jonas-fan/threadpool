@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#define MAX_COUNT 100
+
 static void increment(void *data)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -25,11 +27,11 @@ int main(/*int argc, char *argv[]*/)
     unsigned int count = 0;
     unsigned int index;
 
-    for (index = 0; index < 1; ++index) {
+    for (index = 0; index < MAX_COUNT; ++index) {
         assert(threadpool_run(pool, increment, &count) == 0);
     }
 
-    while (count != 1) {
+    while (count != MAX_COUNT) {
         usleep(200 * 1000);
     }
 
