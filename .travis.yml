@@ -3,7 +3,8 @@ language: c
 compiler: gcc
 
 before_script:
-    - cd build
+    - mkdir build/
+    - cd build/
     - cmake ..
 
 script: make -j4
