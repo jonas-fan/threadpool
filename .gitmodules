@@ -1,3 +1,0 @@
-[submodule "third_party/simple-container"]
-	path = third_party/simple-container
-	url = https://github.com/yjfan/simple-container.git
