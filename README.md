@@ -1,10 +1,10 @@
 # threadpool
 [![Build Status](https://travis-ci.org/yjfan/threadpool.svg?branch=master)](https://travis-ci.org/yjfan/threadpool)
 
-Simple thread pool implementation in C
+The C++11 simple thread pool.
 
-## Build
-```
+## Building
+```sh
 $ git clone https://github.com/yjfan/threadpool.git
 $ cd threadpool/
 $ mkdir build/
@@ -13,22 +13,37 @@ $ cmake ..
 $ make
 ```
 
+## Installing
+```sh
+$ cd build/
+$ make install
+```
+After executing `make install`, this library will be copied into `threadpool/bin/*`.
+
 ## Example
 ```cpp
-void worker(void *user_data)
+#include "threadpool/threadpool.h"
+
+static void worker(void *user_data)
 {
-    // do something ...
+    /* Do something ... */
 }
-```
 
-```cpp
-threadpool_t *pool = threadpool_create(8);
+int main(int argc, char *argv[])
+{
+    /* Create a thread pool which has eight workers. */
+    ThreadPool *pool = new ThreadPool(8);
 
-threadpool_run(pool, worker, NULL);
+    /* Push a routine into the pool. */
+    pool->push(worker, NULL)
 
-// do something ...
+    /* Do something ... */
 
-threadpool_destroy(pool);
+    /* Wait for all routines to be finished then destroy the pool. */
+    delete pool;
+
+    return 0;
+}
 ```
 
 ## License

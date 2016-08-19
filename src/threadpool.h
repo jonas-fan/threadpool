@@ -1,30 +1,34 @@
 #ifndef THREAD_POOL_H_
 #define THREAD_POOL_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <deque>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
 
-/**
- *    Simple thread pool
- *
- *    @date    2016/03/12
- *    @author  Jian <jianfan.tw@gmail.com>
- */
+class ThreadTask;
+class ThreadWorker;
 
-typedef struct threadpool_t threadpool_t;
+class ThreadPool
+{
+public:
+    ThreadPool(unsigned int size);
+    ~ThreadPool();
 
-typedef void (*threadpool_func)(void *);
+    bool push(void (*routine)(void *), void *user_data);
 
-threadpool_t * threadpool_create(unsigned int threads);
-void threadpool_destroy(threadpool_t *pool);
+private:
+    static void dispath(void *user_data);
 
-unsigned int threadpool_threads(threadpool_t *pool);
+private:
+    bool running_;
+    unsigned int size_;
 
-int threadpool_run(threadpool_t *pool, threadpool_func function, void *user_data);
+    std::mutex mutex_;
+    std::condition_variable cond_var_;
+    std::thread *dispatcher_;
+    std::deque<ThreadTask *> tasks_;
+    std::deque<ThreadWorker *> workers_;
+};
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif  /* THREAD_POOL_H_ */
+#endif /* THREAD_POOL_H_ */

@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(threadpool C)
+project(threadpool CXX)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall -Wextra -pedantic -std=gnu99 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -pedantic -std=c++11 -g")
+
 set(INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
 
 add_subdirectory(src)
 
-# Test
-add_executable(threads ./tests/threads.c)
+# Tests
+add_executable(threads ./tests/threads.cpp)
 target_link_libraries(threads ${PROJECT_NAME})

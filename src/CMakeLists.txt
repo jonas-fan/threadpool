@@ -1,9 +1,9 @@
-set(HEADERS
-    ./threadpool.h
-)
+set(HEADERS ./threadpool.h)
 
 set(SOURCES
-    ./threadpool.c
+    ./threadpool.cpp
+    ./threadworker.cpp
+    ./threadtask.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
