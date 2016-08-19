@@ -1,4 +1,4 @@
-#include <thread_pool.h>
+#include "../src/threadpool.h"
 
 #include <stdio.h>
 #include <assert.h>

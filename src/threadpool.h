@@ -27,4 +27,4 @@ int threadpool_run(threadpool_t *pool, threadpool_func function, void *user_data
 }
 #endif
 
-#endif  /*  THREAD_POOL_H_ */
+#endif  /* THREAD_POOL_H_ */

@@ -1,17 +1,16 @@
-# thread-pool
-[![Build Status](https://travis-ci.org/yjfan/thread-pool.svg?branch=master)](https://travis-ci.org/yjfan/thread-pool)
+# threadpool
+[![Build Status](https://travis-ci.org/yjfan/threadpool.svg?branch=master)](https://travis-ci.org/yjfan/threadpool)
 
 Simple thread pool implementation in C
 
 ## Build
 ```
-$ git clone https://github.com/yjfan/thread-pool.git
-$ cd thread-pool/
-$ makdir build/
+$ git clone https://github.com/yjfan/threadpool.git
+$ cd threadpool/
+$ mkdir build/
 $ cd build/
 $ cmake ..
-$ make -j4
-$ make install
+$ make
 ```
 
 ## Example

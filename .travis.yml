@@ -7,10 +7,10 @@ before_script:
     - cd build/
     - cmake ..
 
-script: make -j4
+script: make
 
 after_script:
-    - ./test/test
+    - ./threads
 
 notifications:
     email:
