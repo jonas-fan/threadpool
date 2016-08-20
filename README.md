@@ -20,13 +20,20 @@ $ make install
 ```
 After executing `make install`, this library will be copied into `threadpool/bin/*`.
 
+## Building without CMake
+```sh
+$ g++ example.cpp -Ithreadpool/bin/include -Lthreadpool/bin/lib -lthreadpool -lpthread -std=c++11
+```
+
 ## Example
 ```cpp
+#include <iostream>
 #include "threadpool/threadpool.h"
 
-static void worker(void *user_data)
+static void routine(void *user_data)
 {
     /* Do something ... */
+    std::cout << "Hello threadpool!" << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -35,7 +42,7 @@ int main(int argc, char *argv[])
     ThreadPool *pool = new ThreadPool(8);
 
     /* Push a routine into the pool. */
-    pool->push(worker, NULL)
+    pool->push(routine, NULL);
 
     /* Do something ... */
 
