@@ -1,4 +1,5 @@
 # threadpool
+[![Build Status](https://travis-ci.org/yjfan/threadpool.svg?branch=master)](https://travis-ci.org/yjfan/threadpool)
 
 The C++11 simple thread pool.
 

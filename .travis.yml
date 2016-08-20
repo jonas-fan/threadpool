@@ -1,0 +1,33 @@
+sudo: false
+
+language: cpp
+
+compiler:
+  - gcc
+
+before_script:
+  - mkdir build/
+  - cd build/
+  - cmake ..
+
+script: make
+
+after_script:
+  - ./threads_test
+
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.8
+      - g++-4.8
+
+notifications:
+  email:
+    - jianfan.tw@gmail.com
+  on_success: change
+  on_failure: always

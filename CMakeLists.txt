@@ -9,5 +9,5 @@ set(INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
 add_subdirectory(src)
 
 # Tests
-add_executable(threads ./tests/threads.cpp)
+add_executable(threads ./tests/threads_test.cpp)
 target_link_libraries(threads ${PROJECT_NAME})

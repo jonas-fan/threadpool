@@ -6,7 +6,6 @@
 #include <condition_variable>
 #include <thread>
 
-class ThreadTask;
 class ThreadWorker;
 
 class ThreadPool
@@ -26,9 +25,9 @@ private:
 
     std::mutex mutex_;
     std::condition_variable cond_var_;
-    std::thread *dispatcher_;
-    std::deque<ThreadTask *> tasks_;
+    std::thread dispatcher_;
     std::deque<ThreadWorker *> workers_;
+    std::deque< std::function<void ()> > tasks_;
 };
 
 #endif /* THREAD_POOL_H_ */

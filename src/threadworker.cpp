@@ -1,9 +1,10 @@
 #include "threadworker.h"
 
 ThreadWorker::ThreadWorker()
-    : running_(true), idle_(true), task_(NULL), mutex_(), cond_var_()
+    : running_(true), idle_(true), task_(NULL),
+      mutex_(), cond_var_(), thread_(ThreadWorker::routine, this)
 {
-    this->thread_ = new std::thread(ThreadWorker::routine, this);
+
 }
 
 ThreadWorker::~ThreadWorker()
@@ -15,12 +16,7 @@ ThreadWorker::~ThreadWorker()
 
     this->mutex_.unlock();
 
-    this->thread_->join();
-    delete this->thread_;
-
-    if (this->task_) {
-        delete this->task_;
-    }
+    this->thread_.join();
 }
 
 bool ThreadWorker::isIdle()
@@ -30,7 +26,7 @@ bool ThreadWorker::isIdle()
     return this->idle_;
 }
 
-bool ThreadWorker::assign(ThreadTask *task)
+bool ThreadWorker::assign(std::function<void ()> task)
 {
     if (!task) {
         return false;
@@ -54,6 +50,7 @@ void ThreadWorker::routine(void *user_data)
     ThreadWorker *self = reinterpret_cast<ThreadWorker *>(user_data);
 
     std::unique_lock<std::mutex> lock(self->mutex_, std::defer_lock);
+    std::function<void ()> task = NULL;
 
     while (true) {
         lock.lock();
@@ -71,15 +68,13 @@ void ThreadWorker::routine(void *user_data)
             }
         }
 
-        ThreadTask *task = self->task_;
-
-        self->task_ = NULL;
+        std::swap(task, self->task_);
 
         lock.unlock();
 
         if (task) {
-            task->run();
-            delete task;
+            task();
+            task = NULL;
         }
     }
 }

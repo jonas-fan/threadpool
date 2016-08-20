@@ -1,24 +1,9 @@
 #include "threadpool.h"
 #include "threadworker.h"
-#include <chrono>
-
-// template <typename Iterator>
-// static inline ThreadWorker * get_idle_worker(Iterator first, Iterator last)
-// {
-//     while (first != last) {
-//         if ((*first)->isIdle()) {
-//             return *first;
-//         }
-
-//         ++first;
-//     }
-
-//     return NULL;
-// }
 
 ThreadPool::ThreadPool(unsigned int size)
     : running_(true), size_(size), mutex_(), cond_var_(),
-      tasks_(), workers_(size)
+      workers_(size), tasks_()
 {
     for (std::deque<ThreadWorker *>::iterator iter = this->workers_.begin();
          iter != this->workers_.end();
@@ -27,11 +12,12 @@ ThreadPool::ThreadPool(unsigned int size)
         *iter = new ThreadWorker();
     }
 
-    this->dispatcher_ = new std::thread(ThreadPool::dispath, this);
+    this->dispatcher_ = std::thread(ThreadPool::dispath, this);
 }
 
 ThreadPool::~ThreadPool()
 {
+    /* TODO: Consider how to shutdown gracefully. */
     while (!this->tasks_.empty()) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -43,15 +29,10 @@ ThreadPool::~ThreadPool()
 
     this->mutex_.unlock();
 
-    this->dispatcher_->join();
-    delete this->dispatcher_;
+    this->dispatcher_.join();
 
     for (ThreadWorker *worker : this->workers_) {
         delete worker;
-    }
-
-    for (ThreadTask *task : this->tasks_) {
-        delete task;
     }
 }
 
@@ -61,7 +42,7 @@ bool ThreadPool::push(void (*routine)(void *), void *user_data)
         return false;
     }
 
-    ThreadTask *task = new ThreadTask(routine, user_data);
+    std::function<void ()> task = std::bind(routine, user_data);
 
     std::unique_lock<std::mutex> lock(this->mutex_);
 
@@ -80,6 +61,7 @@ void ThreadPool::dispath(void *user_data)
     ThreadPool *self = reinterpret_cast<ThreadPool *>(user_data);
 
     std::unique_lock<std::mutex> lock(self->mutex_, std::defer_lock);
+    std::function<void ()> task = NULL;
 
     while (true) {
         lock.lock();
@@ -96,7 +78,7 @@ void ThreadPool::dispath(void *user_data)
             }
         }
 
-        ThreadTask *task = self->tasks_.front();
+        task = self->tasks_.front();
 
         self->tasks_.pop_front();
 
@@ -108,6 +90,7 @@ void ThreadPool::dispath(void *user_data)
 
         bool assign = false;
 
+        /* TODO: Optimize. */
         while (!assign) {
             for (ThreadWorker *worker : self->workers_) {
                 if (worker->isIdle()) {
@@ -117,15 +100,5 @@ void ThreadPool::dispath(void *user_data)
                 }
             }
         }
-
-        // ThreadWorker *worker = get_idle_worker(self->workers_.begin(), self->workers_.end());
-
-        // if (worker) {
-        //     worker->assign(task);
-        // }
-        // else {
-        //     // TODO: adjust
-        //     delete task;
-        // }
     }
 }
