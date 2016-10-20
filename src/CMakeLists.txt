@@ -26,11 +26,11 @@ target_link_libraries(${PROJECT_NAME}
 
 # Install
 install(FILES ${HEADERS}
-    DESTINATION ${INSTALL_DIR}/include/threadpool/
+    DESTINATION include/threadpool/
 )
 
 install(TARGETS ${PROJECT_NAME}
-    DESTINATION ${INSTALL_DIR}/lib
+    DESTINATION lib
 )
 
 #install(TARGETS ${TARGET_LIB_SHARED}

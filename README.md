@@ -9,7 +9,7 @@ $ git clone https://github.com/yjfan/threadpool.git
 $ cd threadpool/
 $ mkdir build/
 $ cd build/
-$ cmake ..
+$ cmake .. -DCMAKE_INSTALL_PREFIX=../bin/
 $ make
 ```
 
@@ -18,9 +18,10 @@ $ make
 $ cd build/
 $ make install
 ```
-After executing `make install`, this library will be copied into `threadpool/bin/*`.
+After executing `make install`, this library will be copied into `${CMAKE_INSTALL_PREFIX}/*`.
 
-## Building without CMake
+## Building your own application without CMake
+After building threadpool with CMake, you can use this to build your application without CMake.
 ```sh
 $ g++ example.cpp -Ithreadpool/bin/include -Lthreadpool/bin/lib -lthreadpool -lpthread -std=c++11
 ```
