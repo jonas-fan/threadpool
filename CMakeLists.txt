@@ -7,10 +7,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -pedantic -std=c++11 -
 add_subdirectory(src)
 
 # Tests
-add_executable(threads
+add_executable(threads_test
     ./tests/threads_test.cpp
 )
 
-target_link_libraries(threads
+target_link_libraries(threads_test
     ${PROJECT_NAME}
 )

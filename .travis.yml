@@ -10,7 +10,7 @@ before_script:
   - cd build/
   - cmake ..
 
-script: make
+script: make -j4
 
 after_script:
   - ./threads_test

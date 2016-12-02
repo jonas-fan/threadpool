@@ -55,7 +55,7 @@ void ThreadWorker::routine(void *user_data)
     while (true) {
         lock.lock();
 
-        if (!self->running_) {
+        if (!self->task_ && !self->running_) {
             return;
         }
 
@@ -63,7 +63,10 @@ void ThreadWorker::routine(void *user_data)
             self->idle_ = true;
             self->cond_var_.wait(lock);
 
-            if (!self->running_) {
+            if (self->task_) {
+                break;
+            }
+            else if (!self->running_) {
                 return;
             }
         }

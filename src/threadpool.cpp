@@ -1,14 +1,28 @@
 #include "threadpool.h"
 #include "threadworker.h"
 
+template <typename Iterator>
+static bool assignTask(std::function<void ()> &task, Iterator begin, Iterator end)
+{
+    while (begin != end) {
+        ThreadWorker *worker = *begin;
+
+        if (worker->isIdle()) {
+            worker->assign(task);
+            return true;
+        }
+
+        ++begin;
+    }
+
+    return false;
+}
+
 ThreadPool::ThreadPool(unsigned int size)
     : running_(true), size_(size), mutex_(), cond_var_(),
       workers_(size), tasks_()
 {
-    for (std::deque<ThreadWorker *>::iterator iter = this->workers_.begin();
-         iter != this->workers_.end();
-         ++iter)
-    {
+    for (auto iter = this->workers_.begin(); iter != this->workers_.end(); ++iter) {
         *iter = new ThreadWorker();
     }
 
@@ -17,11 +31,6 @@ ThreadPool::ThreadPool(unsigned int size)
 
 ThreadPool::~ThreadPool()
 {
-    /* TODO: Consider how to shutdown gracefully. */
-    while (!this->tasks_.empty()) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-
     this->mutex_.lock();
 
     this->running_ = false;
@@ -66,14 +75,17 @@ void ThreadPool::dispath(void *user_data)
     while (true) {
         lock.lock();
 
-        if (!self->running_) {
+        if (self->tasks_.empty() && !self->running_) {
             return;
         }
 
         while (self->tasks_.empty()) {
             self->cond_var_.wait(lock);
 
-            if (!self->running_) {
+            if (!self->tasks_.empty()) {
+                break;
+            }
+            else if (!self->running_) {
                 return;
             }
         }
@@ -88,17 +100,8 @@ void ThreadPool::dispath(void *user_data)
             continue;
         }
 
-        bool assign = false;
-
-        /* TODO: Optimize. */
-        while (!assign) {
-            for (ThreadWorker *worker : self->workers_) {
-                if (worker->isIdle()) {
-                    worker->assign(task);
-                    assign = true;
-                    break;
-                }
-            }
+        while (!assignTask(task, self->workers_.begin(), self->workers_.end())) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
     }
 }

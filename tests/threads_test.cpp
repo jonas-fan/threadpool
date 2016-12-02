@@ -30,13 +30,9 @@ int main(int argc, char *argv[])
         assert(pool->push(increment, &count) == true);
     }
 
-    while (count != MAX_TEST_COUNT) {
-        usleep(200 * 1000);
-    }
-
     delete pool;
 
-    printf("[OK]\n");
+    printf("[OK] count=%u\n", count);
 
     return 0;
 }
