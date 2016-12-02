@@ -21,12 +21,12 @@ $ make install
 After executing `make install`, this library will be copied into `${CMAKE_INSTALL_PREFIX}/*`.
 
 ## Build our own application without CMake
-To build our application, we should build threadpool with CMake. Otherwise we need to write makefile by ourselves.
+To build our application, we should build threadpool with CMake. Otherwise we need to write makefiles by ourselves.
 After building, the following command can help to build an application without CMake.
 ```sh
 $ g++ example.cpp -Ithreadpool/bin/include -Lthreadpool/bin/lib -lthreadpool -lpthread -std=c++11
 ```
-However, suggest that we should use CMake. It's very powerful tool.
+However, suggest that we should use CMake. It's a very powerful tool.
 
 ## Example
 ```cpp
