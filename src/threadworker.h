@@ -20,11 +20,10 @@ private:
 
 private:
     bool running_;
-    bool idle_;
 
     std::function<void ()> task_;
-    std::mutex mutex_;
-    std::condition_variable cond_var_;
+    std::recursive_mutex mutex_;
+    std::condition_variable_any cond_var_;
     std::thread thread_;
 };
 

@@ -1,7 +1,7 @@
 #include "threadworker.h"
 
 ThreadWorker::ThreadWorker()
-    : running_(true), idle_(true), task_(NULL),
+    : running_(true), task_(NULL),
       mutex_(), cond_var_(), thread_(ThreadWorker::routine, this)
 {
 
@@ -21,9 +21,9 @@ ThreadWorker::~ThreadWorker()
 
 bool ThreadWorker::isIdle()
 {
-    std::unique_lock<std::mutex> lock(this->mutex_);
+    std::unique_lock<std::recursive_mutex> lock(this->mutex_);
 
-    return this->idle_;
+    return (this->running_ && !this->task_);
 }
 
 bool ThreadWorker::assign(std::function<void ()> task)
@@ -32,13 +32,12 @@ bool ThreadWorker::assign(std::function<void ()> task)
         return false;
     }
 
-    std::unique_lock<std::mutex> lock(this->mutex_);
+    std::unique_lock<std::recursive_mutex> lock(this->mutex_);
 
-    if (!this->running_ || !this->idle_) {
+    if (!this->isIdle()) {
         return false;
     }
 
-    this->idle_ = false;
     this->task_ = task;
     this->cond_var_.notify_one();
 
@@ -49,7 +48,7 @@ void ThreadWorker::routine(void *user_data)
 {
     ThreadWorker *self = reinterpret_cast<ThreadWorker *>(user_data);
 
-    std::unique_lock<std::mutex> lock(self->mutex_, std::defer_lock);
+    std::unique_lock<std::recursive_mutex> lock(self->mutex_, std::defer_lock);
     std::function<void ()> task = NULL;
 
     while (true) {
@@ -60,7 +59,6 @@ void ThreadWorker::routine(void *user_data)
         }
 
         while (!self->task_) {
-            self->idle_ = true;
             self->cond_var_.wait(lock);
 
             if (self->task_) {
