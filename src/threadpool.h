@@ -22,6 +22,7 @@ private:
         EXIT_IMMEDIATELY
     };
 
+    bool shouldExit() const;
     static void dispath(void *user_data);
 
 private:

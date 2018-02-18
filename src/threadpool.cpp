@@ -62,6 +62,19 @@ void ThreadPool::join()
     this->workers_.clear();
 }
 
+bool ThreadPool::shouldExit() const
+{
+    if (this->state_ == ThreadPool::EXIT_IMMEDIATELY) {
+        return true;
+    }
+
+    if ((this->state_ == ThreadPool::EXIT) && this->tasks_.empty()) {
+        return true;
+    }
+
+    return false;
+}
+
 void ThreadPool::dispath(void *user_data)
 {
     ThreadPool *self = reinterpret_cast<ThreadPool *>(user_data);
@@ -72,20 +85,14 @@ void ThreadPool::dispath(void *user_data)
     while (true) {
         lock.lock();
 
-        if (self->state_ == ThreadPool::EXIT_IMMEDIATELY) {
-            return;
-        }
-        else if ((self->state_ == ThreadPool::EXIT) && self->tasks_.empty()) {
+        if (self->shouldExit()) {
             return;
         }
 
         while (self->tasks_.empty()) {
             self->cond_var_.wait(lock);
 
-            if (self->state_ == ThreadPool::EXIT_IMMEDIATELY) {
-                return;
-            }
-            else if ((self->state_ == ThreadPool::EXIT) && self->tasks_.empty()) {
+            if (self->shouldExit()) {
                 return;
             }
         }

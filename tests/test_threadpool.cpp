@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
 
     pool.join();
 
+    assert(count == MAX_TEST_COUNT);
+
     printf("[OK] count=%u\n", count);
 
     return 0;
