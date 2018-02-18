@@ -21,16 +21,16 @@ static void increment(void *user_data)
 
 int main(int argc, char *argv[])
 {
-    ThreadPool *pool = new ThreadPool(MAX_THREADS);
+    ThreadPool pool(MAX_THREADS);
 
     unsigned int count = 0;
     unsigned int index;
 
     for (index = 0; index < MAX_TEST_COUNT; ++index) {
-        assert(pool->push(increment, &count) == true);
+        assert(pool.push(increment, &count) == true);
     }
 
-    delete pool;
+    pool.join();
 
     printf("[OK] count=%u\n", count);
 

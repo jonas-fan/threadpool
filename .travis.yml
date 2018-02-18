@@ -13,7 +13,7 @@ before_script:
 script: make -j4
 
 after_script:
-    - ./tests/threads_test
+    - ./tests/test_threadpool
 
 install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi

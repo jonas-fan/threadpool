@@ -1,9 +1,9 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
-add_executable(threads_test
-    ./threads_test.cpp
+add_executable(test_threadpool
+    ./test_threadpool.cpp
 )
 
-target_link_libraries(threads_test
+target_link_libraries(test_threadpool
     ${PROJECT_NAME}
 )

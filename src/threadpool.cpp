@@ -1,46 +1,22 @@
 #include "threadpool.h"
-#include "threadworker.h"
-
-template <typename Iterator>
-static bool assignTask(std::function<void ()> &task, Iterator begin, Iterator end)
-{
-    while (begin != end) {
-        ThreadWorker *worker = *begin;
-
-        if (worker->isIdle()) {
-            worker->assign(task);
-            return true;
-        }
-
-        ++begin;
-    }
-
-    return false;
-}
 
 ThreadPool::ThreadPool(unsigned int size)
-    : running_(true), size_(size), mutex_(), cond_var_(),
-      workers_(size), tasks_()
+    : state_(ThreadPool::RUNNING), mutex_(), cond_var_(), tasks_(), workers_()
 {
-    for (auto iter = this->workers_.begin(); iter != this->workers_.end(); ++iter) {
-        *iter = new ThreadWorker();
+    for (unsigned int index = 0; index < size; ++index) {
+        this->workers_.push_back(new std::thread(ThreadPool::dispath, this));
     }
-
-    this->dispatcher_ = std::thread(ThreadPool::dispath, this);
 }
 
 ThreadPool::~ThreadPool()
 {
     this->mutex_.lock();
-
-    this->running_ = false;
-    this->cond_var_.notify_one();
-
+    this->state_ = ThreadPool::EXIT_IMMEDIATELY;
+    this->cond_var_.notify_all();
     this->mutex_.unlock();
 
-    this->dispatcher_.join();
-
-    for (ThreadWorker *worker : this->workers_) {
+    for (std::thread *worker : this->workers_) {
+        worker->join();
         delete worker;
     }
 }
@@ -55,7 +31,7 @@ bool ThreadPool::push(void (*routine)(void *), void *user_data)
 
     std::unique_lock<std::mutex> lock(this->mutex_);
 
-    if (!this->running_) {
+    if (this->state_ != ThreadPool::RUNNING) {
         return false;
     }
 
@@ -63,6 +39,27 @@ bool ThreadPool::push(void (*routine)(void *), void *user_data)
     this->cond_var_.notify_one();
 
     return true;
+}
+
+void ThreadPool::join()
+{
+    {
+        std::unique_lock<std::mutex> lock(this->mutex_);
+
+        if (this->state_ != ThreadPool::RUNNING) {
+            return;
+        }
+
+        this->state_ = ThreadPool::EXIT;
+        this->cond_var_.notify_all();
+    }
+
+    for (std::thread *worker : this->workers_) {
+        worker->join();
+        delete worker;
+    }
+
+    this->workers_.clear();
 }
 
 void ThreadPool::dispath(void *user_data)
@@ -75,17 +72,20 @@ void ThreadPool::dispath(void *user_data)
     while (true) {
         lock.lock();
 
-        if (self->tasks_.empty() && !self->running_) {
+        if (self->state_ == ThreadPool::EXIT_IMMEDIATELY) {
+            return;
+        }
+        else if ((self->state_ == ThreadPool::EXIT) && self->tasks_.empty()) {
             return;
         }
 
         while (self->tasks_.empty()) {
             self->cond_var_.wait(lock);
 
-            if (!self->tasks_.empty()) {
-                break;
+            if (self->state_ == ThreadPool::EXIT_IMMEDIATELY) {
+                return;
             }
-            else if (!self->running_) {
+            else if ((self->state_ == ThreadPool::EXIT) && self->tasks_.empty()) {
                 return;
             }
         }
@@ -96,12 +96,8 @@ void ThreadPool::dispath(void *user_data)
 
         lock.unlock();
 
-        if (!task) {
-            continue;
-        }
-
-        while (!assignTask(task, self->workers_.begin(), self->workers_.end())) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        if (task) {
+            task();
         }
     }
 }
